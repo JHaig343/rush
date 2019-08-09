@@ -1,29 +1,28 @@
 // structopt is useful for building CLI applications
 use structopt::StructOpt;
+use failure::ResultExt;
+use exitfailure::ExitFailure;
+
+
 #[derive(StructOpt, Debug)]
 struct Cli {
-    pattern: String,
     #[structopt(parse(from_os_str))]
     path: std::path::PathBuf,
 }
-
-#[derive(Debug)]
-struct CustomError(String);
 
 
 
 impl std::fmt::Display for Cli {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "file: {} args: {}", self.path.to_string_lossy(), self.pattern)
+        write!(f, "file: {}", self.path.to_string_lossy())
     }
 }
 
-fn main() -> Result<(), CustomError> {
+fn main() -> Result<(), ExitFailure> {
     let args = Cli::from_args();
-    println!("CLI Info: {}", args);
     // read in the file contents (as one big string...)
-    // question mark on end acts like commented match block below
-    let content = std::fs::read_to_string(&args.path).map_err(|err| CustomError(format!("Error reading {}: {}", &args.path.to_string_lossy(), err)))?;
+    // question mark on end acts like commented match block below(easy way to catch errors)
+    let content = std::fs::read_to_string(&args.path).with_context(|_| format!("Error reading {}", &args.path.to_string_lossy()))?;
     // let result = match content {
         // Ok(_content) => { _content },
         // Err(error) => { panic!("An Error occurred: {}", error);}
