@@ -2,24 +2,10 @@
 // v.0.1.0
 // By Jacob Haig (jhaig343@gmail.com)
 
-use structopt::StructOpt;
-use std::path::PathBuf;
 use std::path::Path;
 use std::env;
 use std::process::Command;
-use std::process::ExitStatus;
 use std::io::{self, Write, BufRead};
-
-
-#[derive(StructOpt, Debug)]
-#[structopt(name = "rush", about = "Rust Shell command structure.")]
-struct Args {
-
-	command: String, //inital cli command
-	#[structopt(parse(from_os_str))]
-	params: Vec<PathBuf> //command arguments(any number)
-}
-
 
 
 
@@ -54,16 +40,27 @@ fn main() {
 			continue;
 		}
 
-		let output = Command::new(execute).args(args).output().expect("Failed to execute command");
-		
-		if !output.status.success() {
-			let err = output.stderr;
-			print!("{}", String::from_utf8(err).ok().unwrap() );
+		let output = Command::new(execute).args(args).env("LS_COLORS", "rs=0:di=38;5;27:mh=44;38;5;15").output();
+
+		// Error message syntax: [COMMAND]: [Errormsg]
+		if output.is_err() {
+			let failed_output = output.unwrap_err();
+			println!("{}: {}", execute, failed_output );
+			continue;
 		}
 		else {
-			let result = output.stdout;
-			print!("{}", String::from_utf8(result).ok().unwrap() );
+			let success_output = output.expect("Shell failed to execute command.");
+		
+			if !success_output.status.success() {
+				let err = success_output.stderr;
+				print!("{}", String::from_utf8(err).ok().unwrap() );
+			}
+			else {
+				let result = success_output.stdout;
+				print!("{}", String::from_utf8(result).ok().unwrap() );
+			}
 		}
+		
 		
 	}
 	
