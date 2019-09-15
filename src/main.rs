@@ -4,7 +4,10 @@
 
 use structopt::StructOpt;
 use std::path::PathBuf;
+use std::path::Path;
+use std::env;
 use std::process::Command;
+use std::process::ExitStatus;
 use std::io::{self, Write, BufRead};
 
 
@@ -39,10 +42,6 @@ fn main() {
 		// separate string into words (split on spaces)
 		let split = line.split(" ");
 
-		// for s in split {
-		// 	println!("{}", s);
-		// }
-
 		let mut args = split.collect::<Vec<&str>>();
 		let execute = args.remove(0);
 
@@ -50,16 +49,29 @@ fn main() {
 		if line == "exit" {
 			break;
 		}
+		if execute == "cd" { //cd is a shell builtin, not a /bin program
+			let root = Path::new(args[0]);
+			assert!(env::set_current_dir(&root).is_ok());
+			continue;
+		}
 
 		// println!("Work in progess!");
 		let output = Command::new(execute).args(args).output().expect("Failed to execute command");
-		let result = output.stdout;
-		print!("{}", String::from_utf8(result).ok().unwrap() );
+
+		// println!("{:?}", output.status);
+		
+		if !output.status.success() {
+			let err = output.stderr;
+			print!("{}", String::from_utf8(err).ok().unwrap() );
+		}
+		else {
+			let result = output.stdout;
+			print!("{}", String::from_utf8(result).ok().unwrap() );
+		}
+		
 	}
 	
 }
-
-
 
 
 // let output = Command::new("echo")
