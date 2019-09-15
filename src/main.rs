@@ -45,7 +45,6 @@ fn main() {
 		let mut args = split.collect::<Vec<&str>>();
 		let execute = args.remove(0);
 
-		// println!("{}", line);
 		if line == "exit" {
 			break;
 		}
@@ -55,10 +54,7 @@ fn main() {
 			continue;
 		}
 
-		// println!("Work in progess!");
 		let output = Command::new(execute).args(args).output().expect("Failed to execute command");
-
-		// println!("{:?}", output.status);
 		
 		if !output.status.success() {
 			let err = output.stderr;
@@ -72,29 +68,3 @@ fn main() {
 	}
 	
 }
-
-
-// let output = Command::new("echo")
- //                     .arg("Hello blorld")
- //                     .output()
- //                     .expect("Failed to execute command");
-	// let string = output.stdout;
-	// println!("{}", String::from_utf8(string).ok().unwrap());
-// shell entrypoint
-// fn main() -> Result<(), ExitFailure> {
-// 	let args = Args::from_args();
-// 	let command = args.command;
-// 	let params = args.params;
-// 	println!("{}", command);
-// 	// for i in params {
-// 	// 	// need to use to_string_lossy as PathBuf isn't formatted
-// 	// 	println!("{}", i.to_string_lossy());
-// 	// }
-	
-// 	let output = Command::new("echo")
-//                      .arg("Hello blorld")
-//                      .output()
-//                      .expect("Failed to execute command");
-// 	println!("{}",String::from_utf8(output.stdout.as_slice()) );
-// 	Ok(())
-// }
