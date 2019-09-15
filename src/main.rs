@@ -40,6 +40,12 @@ fn main() {
 			continue;
 		}
 
+		if execute == "vim" || execute == "nano" { //Need to spawn a child process, not wait to collect exit output
+			let mut program = Command::new(execute).args(args).spawn().expect("Failed to execute command");
+			program.wait().expect("child process terminated abnormally");
+			continue;
+		}
+
 		let output = Command::new(execute).args(args).env("LS_COLORS", "rs=0:di=38;5;27:mh=44;38;5;15").output();
 
 		// Error message syntax: [COMMAND]: [Errormsg]
