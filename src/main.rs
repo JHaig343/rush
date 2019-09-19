@@ -38,7 +38,8 @@ fn main() {
 			let root = Path::new(args[0]);
 			let dir_change = env::set_current_dir(&root);
 			if dir_change.is_err() {
-				println!("cd: {}: no such file or directory.", root.to_string_lossy());
+				let error = dir_change.unwrap_err();
+				println!("cd: {}: {}.", root.to_string_lossy(), error);
 			}
 			continue;
 		}
