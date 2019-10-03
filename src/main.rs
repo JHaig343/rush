@@ -36,7 +36,11 @@ fn main() {
 		}
 		if execute == "cd" { //cd is a shell builtin, not a /bin program
 			let root = Path::new(args[0]);
-			assert!(env::set_current_dir(&root).is_ok());
+			let dir_change = env::set_current_dir(&root);
+			if dir_change.is_err() {
+				let error = dir_change.unwrap_err();
+				println!("cd: {}: {}.", root.to_string_lossy(), error);
+			}
 			continue;
 		}
 
