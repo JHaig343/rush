@@ -13,7 +13,11 @@ fn main() {
 
 
 	loop {
-		print!("=>$");
+		let printDir = env::current_dir();
+		assert!(printDir.is_ok());
+
+		print!("\x1b[34m{}\x1b[0m=>$", printDir.ok().unwrap().to_string_lossy());
+
 		io::stdout().flush().unwrap();
 
 		let buffer = io::stdin();
@@ -36,7 +40,11 @@ fn main() {
 		}
 		if execute == "cd" { //cd is a shell builtin, not a /bin program
 			let root = Path::new(args[0]);
-			assert!(env::set_current_dir(&root).is_ok());
+			if !(env::set_current_dir(&root).is_ok()) {
+				let cd_err = env::set_current_dir(&root);
+				
+				utility::handle_err(cd_err, execute);
+			}
 			continue;
 		}
 
