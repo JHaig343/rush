@@ -1,11 +1,11 @@
 use std::process::Output;
-use std::fmt;
 use std::path::Path;
 use std::ffi::OsStr;
 use std::collections::HashMap;
 
 fn get_ls_colors() -> HashMap<&'static str, &'static str> {
     let mut key_values: HashMap<&str, &str> = HashMap::new();
+
         let colors: Vec<&str> = env!("LS_COLORS").split(":").collect();
         for obj in colors {
             let kvs: Vec<&str> = obj.split("=").collect();
@@ -18,6 +18,10 @@ fn get_ls_colors() -> HashMap<&'static str, &'static str> {
         return key_values;
 }
 
+pub fn handle_err(error: std::result::Result<(), std::io::Error>, command: &str) {
+    let failed_output = error.unwrap_err();
+    println!("\x1b[31m{}: {}\x1b[0m", command, failed_output );
+}
 
 // ANSI escape codes used to print output in color
 pub fn pretty_print(output: Output) {
@@ -27,20 +31,11 @@ pub fn pretty_print(output: Output) {
     }
     else{
         let result = output.stdout;
-        // let mut key_values: HashMap<&str, &str> = HashMap::new();
-        // let colors: Vec<&str> = env!("LS_COLORS").split(":").collect();
-        // for obj in colors {
-        //     let kvs: Vec<&str> = obj.split("=").collect();
-        //     if kvs.len() <= 1 { //Skip incomplete key-value pairs
-        //         continue;
-        //     }
-        //     key_values.insert(kvs[0], kvs[1]);
-
-        // }
-		// println!("{:#?}", key_values);
+        // test_ls_pretty_print(&output);
         print!("{}", String::from_utf8(result).ok().unwrap());
     }
 }
+
 // Testing out pretty-printing success output with 'ls'
 // FIXME: this shit is messay
 pub fn test_ls_pretty_print(output: &Output) {
@@ -56,8 +51,6 @@ pub fn test_ls_pretty_print(output: &Output) {
     for file in files {
         file_strings.insert(0, String::from(file));
     }
-
-
     
     for mut  file in file_strings {
         let  mut extension: &str = "";
@@ -79,12 +72,11 @@ pub fn test_ls_pretty_print(output: &Output) {
                 file = new_file; 
             }
             
-            
-
         }
         output_result.insert(0, file.clone());
     }
     for res in output_result {
-        println!("{}", res);
+        print!("{} ", res);
     }
+    println!();
 }
