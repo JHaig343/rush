@@ -1,4 +1,5 @@
 use std::process::Output;
+use std::process::Child;
 use std::path::Path;
 use std::ffi::OsStr;
 use std::collections::HashMap;
@@ -24,26 +25,28 @@ pub fn handle_err(error: std::result::Result<(), std::io::Error>, command: &str)
 }
 
 // ANSI escape codes used to print output in color
-pub fn pretty_print(output: Output) {
-    if !output.status.success() {
-        let err = output.stderr;
+pub fn pretty_print(output: Child) {
+    let content = output.wait_with_output().unwrap();
+    if !content.status.success() {
+        let err = content.stderr;
         print!("\x1b[31m{}\x1b[0m", String::from_utf8(err).ok().unwrap());
     }
     else{
-        let result = output.stdout;
+        let result = content.stdout;
         // test_ls_pretty_print(&output);
         print!("{}", String::from_utf8(result).ok().unwrap());
     }
 }
 
 // Testing out pretty-printing success output with 'ls'
-// FIXME: this shit is messay
-pub fn test_ls_pretty_print(output: &Output) {
+// FIXME: with changes to spawn separate processes rather than running directly,
+// color printing of filenames is no longer occurring. investigate
+pub fn test_ls_pretty_print(output: Child) {
 
     let file_colors = get_ls_colors();
-    
+    let content = &output.wait_with_output().unwrap();
 
-    let result = &output.stdout;
+    let result = &content.stdout;
     let temp = String::from_utf8(result.to_vec()).ok().unwrap();
     let mut file_strings: Vec<String> = Vec::new();
     let mut output_result: Vec<String> = Vec::new();
@@ -51,7 +54,6 @@ pub fn test_ls_pretty_print(output: &Output) {
     for file in files {
         file_strings.insert(0, String::from(file));
     }
-    
     for mut  file in file_strings {
         let  mut extension: &str = "";
         let file_ref = file.clone();
@@ -78,5 +80,4 @@ pub fn test_ls_pretty_print(output: &Output) {
     for res in output_result {
         print!("{} ", res);
     }
-    println!();
 }

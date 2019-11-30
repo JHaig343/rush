@@ -1,5 +1,5 @@
 // Rust SHell
-// v.0.1.0
+// v.0.2.0
 // By Jacob Haig (jhaig343@gmail.com)
 
 use std::path::Path;
@@ -48,15 +48,11 @@ fn main() {
 			continue;
 		}
 
-		if execute == "vim" || execute == "nano" { //Need to spawn a child process, not wait to collect exit output
-			let mut program = Command::new(execute).args(args).spawn().expect("Failed to execute command");
-			program.wait().expect("child process terminated abnormally");
-			continue;
-		}
-
-		let output = Command::new(execute).args(args).output();
+		let output = Command::new(execute).args(args).spawn();
 
 		// Error message syntax: [COMMAND]: [Errormsg]
+		// \x1b[Xm , where x is the ANSI color code colors following text output - 31 is red
+		// 0 clears color code
 		if output.is_err() {
 			let failed_output = output.unwrap_err();
 			println!("\x1b[31m{}: {}\x1b[0m", execute, failed_output );
@@ -64,10 +60,10 @@ fn main() {
 		}
 		else {
 			let success_output = output.expect("Shell failed to execute command.");
-			if execute == "ls" {
-				utility::test_ls_pretty_print(&success_output);
-				continue;
-			}
+			// if execute == "ls" {
+			// 	utility::test_ls_pretty_print(success_output);
+			// 	continue;
+			// }
 			
 			utility::pretty_print(success_output);
 		}
