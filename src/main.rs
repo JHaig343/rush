@@ -7,27 +7,29 @@ use std::env;
 use std::process::Command;
 use std::io::{self, Write, BufRead};
 mod utility;
+extern crate rustyline;
 
+use rustyline::error::ReadlineError;
+use rustyline::Editor;
 
 fn main() {
 
+	let mut rl = Editor::<()>::new();
+	if rl.load_history("rush_history.txt").is_err() {
+		println!("No previous history found.");
+	}
 
 	loop {
 		let printDir = env::current_dir();
 		assert!(printDir.is_ok());
 
-		print!("\x1b[34m{}\x1b[0m=>$", printDir.ok().unwrap().to_string_lossy());
+		let prompt = format!("\x1b[34m{}\x1b[0m=>$", printDir.ok().unwrap().to_string_lossy());
 
-		io::stdout().flush().unwrap();
+		let mut line = rl.readline(&prompt).unwrap();
 
-		let buffer = io::stdin();
-		
-		let mut line = String::new();
-
-		buffer.lock().read_line(&mut line).unwrap();
-		// pop() will remove the last character in the string, 
-		// which in this case is \n character
-		line.pop();
+		// Once a command is successfully executed, add it to readline history
+		// (which can be accessed by pressing Up Arrow)
+		rl.add_history_entry(line.as_str());
 
 		// separate string into words (split on spaces)
 		let split = line.split(" ");
@@ -36,6 +38,8 @@ fn main() {
 		let execute = args.remove(0);
 
 		if line == "exit" {
+			// save readline history for future sessions
+			rl.save_history("rush_history.txt").unwrap();
 			break;
 		}
 		if execute == "cd" { //cd is a shell builtin, not a /bin program

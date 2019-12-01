@@ -9,4 +9,5 @@ edition = "2018"
 [dependencies]
 failure = "0.1.5"
 exitfailure = "0.5.1"
+rustyline = "5.0.4"
 # indicatif for progress bars
