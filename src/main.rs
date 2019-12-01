@@ -25,11 +25,24 @@ fn main() {
 
 		let prompt = format!("\x1b[34m{}\x1b[0m=>$", printDir.ok().unwrap().to_string_lossy());
 
-		let mut line = rl.readline(&prompt).unwrap();
+		let mut line;
 
-		// Once a command is successfully executed, add it to readline history
-		// (which can be accessed by pressing Up Arrow)
-		rl.add_history_entry(line.as_str());
+		let input = rl.readline(&prompt);
+		match input {
+			Ok(command) => {
+				// Once a command is successfully executed, add it to readline history
+				// (which can be accessed by pressing Up Arrow)
+				rl.add_history_entry(command.as_str());
+				line = command;
+			},
+			Err(ReadlineError::Interrupted) => { //Ctrl-C interrupts
+				continue;
+			},
+			Err(err) => {
+				println!("Unexpected error parsing input: {:?}", err);
+				break;
+			}
+		}
 
 		// separate string into words (split on spaces)
 		let split = line.split(" ");
