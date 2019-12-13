@@ -5,13 +5,12 @@
 use std::path::Path;
 use std::env;
 use std::process::Command;
-use std::io::{self, Write, BufRead};
 mod utility;
 extern crate rustyline;
 
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
-
+// TODO: add support for piping ('|')
 fn main() {
 
 	let mut rl = Editor::<()>::new();
@@ -20,12 +19,12 @@ fn main() {
 	}
 
 	loop {
-		let printDir = env::current_dir();
-		assert!(printDir.is_ok());
+		let print_dir = env::current_dir();
+		assert!(print_dir.is_ok());
 
-		let prompt = format!("\x1b[34m{}\x1b[0m=>$", printDir.ok().unwrap().to_string_lossy());
+		let prompt = format!("\x1b[34m{}\x1b[0m=>$", print_dir.ok().unwrap().to_string_lossy());
 
-		let mut line;
+		let line;
 
 		let input = rl.readline(&prompt);
 		match input {

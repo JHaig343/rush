@@ -1,9 +1,8 @@
-use std::process::Output;
 use std::process::Child;
 use std::path::Path;
 use std::ffi::OsStr;
 use std::collections::HashMap;
-
+#[allow(dead_code)]
 fn get_ls_colors() -> HashMap<&'static str, &'static str> {
     let mut key_values: HashMap<&str, &str> = HashMap::new();
 
@@ -41,6 +40,7 @@ pub fn pretty_print(output: Child) {
 // Testing out pretty-printing success output with 'ls'
 // FIXME: with changes to spawn separate processes rather than running directly,
 // color printing of filenames is no longer occurring. investigate
+#[allow(dead_code)]
 pub fn test_ls_pretty_print(output: Child) {
 
     let file_colors = get_ls_colors();
