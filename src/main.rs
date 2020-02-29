@@ -10,8 +10,10 @@ extern crate rustyline;
 
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
-// TODO: add support for piping ('|')
+// TODO: add support for piping ('|') and redirection('>')
 fn main() {
+
+	let mut redirect_flag : bool = false;
 
 	let mut rl = Editor::<()>::new();
 	if rl.load_history("rush_history.txt").is_err() {
@@ -45,8 +47,19 @@ fn main() {
 
 		// separate string into words (split on spaces)
 		let split = line.split(" ");
-
 		let mut args = split.collect::<Vec<&str>>();
+		let mut redirect_file:&str = "";
+
+		if args.contains(&">") { //redirection
+			redirect_flag = true;
+			let ind = args.binary_search(&">").unwrap();
+			args.remove(ind);
+			println!("{:?}", args);
+			// filename is the last argument in a "[command] > [file]" command.
+			// TODO: update to work with piping to other programs
+			redirect_file = args.pop().unwrap();
+			println!("After: {:?}", args);
+		}
 		let execute = args.remove(0);
 
 		if line == "exit" {
@@ -65,7 +78,7 @@ fn main() {
 		}
 
 		let output = Command::new(execute).args(args).spawn();
-
+		println!("output: {:?}", output);
 		// Error message syntax: [COMMAND]: [Errormsg]
 		// \x1b[Xm , where x is the ANSI color code colors following text output - 31 is red
 		// 0 clears color code
@@ -80,8 +93,23 @@ fn main() {
 			// 	utility::test_ls_pretty_print(success_output);
 			// 	continue;
 			// }
+
+			// if redirect_flag == true {
+			// 	println!("success_output: {:?}", success_output);
+			// 	utility::redirect_to_file(success_output, redirect_file);
+			// 	redirect_flag = false;
+			// 	continue;
+			// }
+			// // Problem: spawning forked process is running/printing paralell
+			// // Solution: block it? or sumthin idk
+			// println!("non-redirect, pretty-printing...");
+
+			// this literally does fuck-all....
+			// utility::pretty_print(success_output);
 			
-			utility::pretty_print(success_output);
+
+			
+			
 		}
 	}
 	
