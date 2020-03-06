@@ -64,25 +64,35 @@ fn main() {
 			continue;
 		}
 
-		let output = Command::new(execute).args(args).spawn();
+		// FIXME: spawn()-ed process needs to be caught somehow; currently it just runs on its own
 
+		let mut command = Command::new(execute);
+		if let Ok(mut child) = command.args(args).spawn() {
+			child.wait().expect("failed to execute command");
+			// println!("Child finished execution");
+		}
+		else{ //err output
+			println!("{:?}", child);
+			println!("command didn't start");
+		}
+		
 		// Error message syntax: [COMMAND]: [Errormsg]
 		// \x1b[Xm , where x is the ANSI color code colors following text output - 31 is red
 		// 0 clears color code
-		if output.is_err() {
-			let failed_output = output.unwrap_err();
-			println!("\x1b[31m{}: {}\x1b[0m", execute, failed_output );
-			continue;
-		}
-		else {
-			let success_output = output.expect("Shell failed to execute command.");
-			// if execute == "ls" {
-			// 	utility::test_ls_pretty_print(success_output);
-			// 	continue;
-			// }
-			
-			utility::pretty_print(success_output);
-		}
+		// if output.is_err() {
+		// 	let failed_output = output.unwrap_err();
+		// 	println!("\x1b[31m{}: {}\x1b[0m", execute, failed_output );
+		// 	continue;
+		// }
+		// else {
+		// 	// let success_output = output.expect("Shell failed to execute command.");
+		// 	// if execute == "ls" {
+		// 	// 	utility::test_ls_pretty_print(success_output);
+		// 	// 	continue;
+		// 	// }
+		// 	println!("Ha Ha");
+		// 	// utility::pretty_print(success_output);
+		// }
 	}
 	
 }
