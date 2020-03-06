@@ -1,5 +1,5 @@
 // Rust SHell
-// v.0.2.0
+// v.0.3.0
 // By Jacob Haig (jhaig343@gmail.com)
 
 use std::path::Path;
@@ -10,7 +10,7 @@ extern crate rustyline;
 
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
-// TODO: add support for piping ('|') and redirection('>')
+// TODO: add support for piping ('|')
 fn main() {
 
 	let mut redirect_flag : bool = false;
