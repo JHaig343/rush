@@ -1,4 +1,5 @@
 use std::process::Child;
+use std::process::Output;
 use std::fs::File;
 use std::io::{BufWriter, Write};
 use std::path::Path;
@@ -41,23 +42,23 @@ pub fn pretty_print(output: Child) {
 
 // Redirect stdout to a file when '>' is used in a command
 // FIXME: IO is being delayed somehow until after next command is run, then fails with "file not found" error
-pub fn redirect_to_file(output: Child, filename: &str) {
+pub fn redirect_to_file(output: Output, filename: &str) {
     // print!("{}", filename);
-    let content = output.wait_with_output().unwrap();
+    let content = output;
     if !content.status.success() {
         let err = content.stderr;
         print!("\x1b[31m{}\x1b[0m", String::from_utf8(err).ok().unwrap());
     }
     else {
         let result = content.stdout;
-        print!("redirect test: {}", String::from_utf8(result).ok().unwrap());
         // print!("redirect test: {}", String::from_utf8(result).ok().unwrap());
-        // let file_output = String::from_utf8(result).ok().unwrap();
+        // print!("redirect test: {}", String::from_utf8(result).ok().unwrap());
+        let file_output = String::from_utf8(result).ok().unwrap();
         
-        // let file = File::create(filename).expect("done f'ed up");
+        let file = File::create(filename).expect("done f'ed up");
         // // fs::write(filename, file_output).expect("Unable to write to file\n");
-        // let mut out_writer = BufWriter::new(file);
-        // out_writer.write(file_output.as_bytes()).expect("f'ed up again");
+        let mut out_writer = BufWriter::new(file);
+        out_writer.write(file_output.as_bytes()).expect("f'ed up again");
     }
 }
 

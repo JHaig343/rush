@@ -4,7 +4,7 @@
 
 use std::path::Path;
 use std::env;
-use std::process::Command;
+use std::process::{Command, Stdio};
 mod utility;
 extern crate rustyline;
 
@@ -54,11 +54,9 @@ fn main() {
 			redirect_flag = true;
 			let ind = args.binary_search(&">").unwrap();
 			args.remove(ind);
-			println!("{:?}", args);
 			// filename is the last argument in a "[command] > [file]" command.
 			// TODO: update to work with piping to other programs
 			redirect_file = args.pop().unwrap();
-			println!("After: {:?}", args);
 		}
 		let execute = args.remove(0);
 
@@ -76,9 +74,14 @@ fn main() {
 			}
 			continue;
 		}
-
-		let output = Command::new(execute).args(args).spawn();
-		println!("output: {:?}", output);
+		// changing stdio to piped when piping commands so that Child's output can be saved
+		let output;
+		if redirect_flag == true {
+			output = Command::new(execute).args(args).stdout(Stdio::piped()).spawn();
+		}
+		else{
+			output = Command::new(execute).args(args).spawn();
+		}
 		// Error message syntax: [COMMAND]: [Errormsg]
 		// \x1b[Xm , where x is the ANSI color code colors following text output - 31 is red
 		// 0 clears color code
@@ -88,21 +91,17 @@ fn main() {
 			continue;
 		}
 		else {
-			let success_output = output.expect("Shell failed to execute command.");
+			let success_output = output.expect("Shell failed to execute command.").wait_with_output();
 			// if execute == "ls" {
 			// 	utility::test_ls_pretty_print(success_output);
 			// 	continue;
 			// }
 
-			// if redirect_flag == true {
-			// 	println!("success_output: {:?}", success_output);
-			// 	utility::redirect_to_file(success_output, redirect_file);
-			// 	redirect_flag = false;
-			// 	continue;
-			// }
-			// // Problem: spawning forked process is running/printing paralell
-			// // Solution: block it? or sumthin idk
-			// println!("non-redirect, pretty-printing...");
+			if redirect_flag == true {
+				utility::redirect_to_file(success_output.unwrap(), redirect_file);
+				redirect_flag = false;
+				continue;
+			}
 
 			// this literally does fuck-all....
 			// utility::pretty_print(success_output);
