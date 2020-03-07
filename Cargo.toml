@@ -11,3 +11,8 @@ failure = "0.1.5"
 exitfailure = "0.5.1"
 rustyline = "5.0.4"
 # indicatif for progress bars
+
+# this sets build options for release builds; cargo build --release
+[profile.release]
+opt-level = 'z' #Optimize for size
+lto = true # Link time Optimization (LTO) tells linker to optimize at link stage

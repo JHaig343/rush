@@ -6,7 +6,6 @@ use std::path::Path;
 use std::env;
 use std::process::{Command, Stdio};
 mod utility;
-extern crate rustyline;
 
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
