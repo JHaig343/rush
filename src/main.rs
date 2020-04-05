@@ -67,7 +67,6 @@ fn main() {
 			// last argument is command that input is being fed to; first command is output of another command
 			// FIXME: separate args past `|` as command + args being piped into
 			redirect_prog = args.pop().unwrap();
-			println!("here its: {:?}", redirect_prog);
 		}
 
 		let execute = args.remove(0);
