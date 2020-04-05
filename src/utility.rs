@@ -1,5 +1,4 @@
-use std::process::Child;
-use std::process::Output;
+use std::process::{Child, Command, Stdio, Output};
 use std::fs::File;
 use std::io::{BufWriter, Write};
 use std::path::Path;
@@ -58,6 +57,20 @@ pub fn redirect_to_file(output: Output, filename: &str) {
         out_writer.write(file_output.as_bytes()).expect("File write failed unexpectedly");
     }
 }
+
+// Pipe shell program output as input to another shell program
+pub fn pipe_to_program(output: Output, program: &str) {
+    let result = output.stdout;
+    // println!("in pipe_to_program: {:?}", result);
+    // println!("program to pipe to: {:?}", program);
+    let command = Command::new(program).stdin(Stdio::piped()).stdout(Stdio::piped()).spawn();
+    // FIXME: do some proper error checking on the Result here
+    match command.ok().unwrap().stdin.unwrap().write_all(&result) {
+        Err(err) => panic!("couldn't write stdin to command: {:?}", err),
+        Ok(_) => println!("{}", String::from_utf8(result).ok().unwrap())
+    }
+}
+
 
 // Testing out pretty-printing success output with 'ls'
 // FIXME: with changes to spawn separate processes rather than running directly,

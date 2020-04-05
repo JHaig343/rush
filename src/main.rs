@@ -14,7 +14,7 @@ use rustyline::Editor;
 fn main() {
 
 	let mut redirect_flag : bool = false;
-
+	let mut piping_flag : bool = false; 
 	let mut rl = Editor::<()>::new();
 	if rl.load_history("rush_history.txt").is_err() {
 		println!("No previous history found.");
@@ -48,16 +48,28 @@ fn main() {
 		// separate string into words (split on spaces)
 		let split = line.split(" ");
 		let mut args = split.collect::<Vec<&str>>();
-		let mut redirect_file:&str = "";
-
+		let mut redirect_file: &str = "";
+		let mut redirect_prog: &str = "";
 		if args.contains(&">") { //redirection
 			redirect_flag = true;
-			let ind = args.binary_search(&">").unwrap();
+
+			let ind = args.iter().position(|&r| r == ">").unwrap();
 			args.remove(ind);
 			// filename is the last argument in a "[command] > [file]" command.
 			// TODO: update to work with piping to other programs
 			redirect_file = args.pop().unwrap();
 		}
+		else if args.contains(&"|") { //piping - [command/input] | [command]
+			piping_flag = true;
+			
+			let ind = args.iter().position(|&r| r == "|").unwrap();
+			args.remove(ind);
+			// last argument is command that input is being fed to; first command is output of another command
+			// FIXME: separate args past `|` as command + args being piped into
+			redirect_prog = args.pop().unwrap();
+			println!("here its: {:?}", redirect_prog);
+		}
+
 		let execute = args.remove(0);
 
 		if line == "exit" {
@@ -65,7 +77,7 @@ fn main() {
 			rl.save_history("rush_history.txt").unwrap();
 			break;
 		}
-		if execute == "cd" { //cd is a shell builtin, not a /bin program
+		if execute == "cd" { //cd is a shell builtin, not a /bin program - so it needs to be created separately
 			let root = Path::new(args[0]);
 			if !(env::set_current_dir(&root).is_ok()) {
 				let cd_err = env::set_current_dir(&root);
@@ -77,6 +89,9 @@ fn main() {
 		// changing stdio to piped when piping commands so that Child's output can be saved
 		let output;
 		if redirect_flag == true {
+			output = Command::new(execute).args(args).stdout(Stdio::piped()).spawn();
+		}
+		else if piping_flag == true {
 			output = Command::new(execute).args(args).stdout(Stdio::piped()).spawn();
 		}
 		else{
@@ -100,6 +115,11 @@ fn main() {
 			if redirect_flag == true {
 				utility::redirect_to_file(success_output.unwrap(), redirect_file);
 				redirect_flag = false;
+				continue;
+			}
+			else if piping_flag == true {
+				utility::pipe_to_program(success_output.unwrap(), redirect_prog);
+				piping_flag = false;
 				continue;
 			}
 
