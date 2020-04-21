@@ -59,11 +59,11 @@ pub fn redirect_to_file(output: Output, filename: &str) {
 }
 
 // Pipe shell program output as input to another shell program
-pub fn pipe_to_program(output: Output, program: &str) {
+pub fn pipe_to_program(output: Output, program: &str, args: Vec<&str>) {
     let result = output.stdout;
     // println!("in pipe_to_program: {:?}", result);
     // println!("program to pipe to: {:?}", program);
-    let command = Command::new(program).stdin(Stdio::piped()).stdout(Stdio::piped()).spawn();
+    let command = Command::new(program).args(args).stdin(Stdio::piped()).stdout(Stdio::piped()).spawn();
     // FIXME: do some proper error checking on the Result here
     match command.ok().unwrap().stdin.unwrap().write_all(&result) {
         Err(err) => panic!("couldn't write stdin to command: {:?}", err),

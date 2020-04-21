@@ -22,6 +22,7 @@ fn main() {
 
 	loop {
 		let print_dir = env::current_dir();
+		// NOTE: think this assert is superfluous
 		assert!(print_dir.is_ok());
 
 		let prompt = format!("\x1b[34m{}\x1b[0m=>$", print_dir.ok().unwrap().to_string_lossy());
@@ -50,6 +51,7 @@ fn main() {
 		let mut args = split.collect::<Vec<&str>>();
 		let mut redirect_file: &str = "";
 		let mut redirect_prog: &str = "";
+		let mut redirect_args: Vec<&str> = Vec::new();
 		if args.contains(&">") { //redirection
 			redirect_flag = true;
 
@@ -64,10 +66,19 @@ fn main() {
 			
 			let ind = args.iter().position(|&r| r == "|").unwrap();
 			args.remove(ind);
+			let mut args_length = args.len() - ind;
+			println!("arglength: {} ind: {}", args_length, ind);
 			// last argument is command that input is being fed to; first command is output of another command
-			// FIXME: separate args past `|` as command + args being piped into
+			// separate args past `|` as command + args being piped into
+			while (args_length - 1) > 0 {
+				redirect_args.push(args.pop().unwrap());
+				args_length -= 1;
+			}
+			
+			redirect_args.reverse();
+			println!("args: {:?}", redirect_args);
+			// last element to right of `|` is the command
 			redirect_prog = args.pop().unwrap();
-			println!("here its: {:?}", redirect_prog);
 		}
 
 		let execute = args.remove(0);
@@ -106,6 +117,7 @@ fn main() {
 			continue;
 		}
 		else {
+			println!("process completing");
 			let success_output = output.expect("Shell failed to execute command.").wait_with_output();
 			// if execute == "ls" {
 			// 	utility::test_ls_pretty_print(success_output);
@@ -118,7 +130,7 @@ fn main() {
 				continue;
 			}
 			else if piping_flag == true {
-				utility::pipe_to_program(success_output.unwrap(), redirect_prog);
+				utility::pipe_to_program(success_output.unwrap(), redirect_prog, redirect_args);
 				piping_flag = false;
 				continue;
 			}
