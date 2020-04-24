@@ -10,7 +10,7 @@ extern crate rustyline;
 
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
-// TODO: add support for piping ('|')
+
 fn main() {
 
 	let mut redirect_flag : bool = false;
@@ -58,7 +58,6 @@ fn main() {
 			let ind = args.iter().position(|&r| r == ">").unwrap();
 			args.remove(ind);
 			// filename is the last argument in a "[command] > [file]" command.
-			// TODO: update to work with piping to other programs
 			redirect_file = args.pop().unwrap();
 		}
 		else if args.contains(&"|") { //piping - [command/input] | [command]
@@ -67,7 +66,7 @@ fn main() {
 			let ind = args.iter().position(|&r| r == "|").unwrap();
 			args.remove(ind);
 			let mut args_length = args.len() - ind;
-			println!("arglength: {} ind: {}", args_length, ind);
+			
 			// last argument is command that input is being fed to; first command is output of another command
 			// separate args past `|` as command + args being piped into
 			while (args_length - 1) > 0 {
@@ -76,7 +75,6 @@ fn main() {
 			}
 			
 			redirect_args.reverse();
-			println!("args: {:?}", redirect_args);
 			// last element to right of `|` is the command
 			redirect_prog = args.pop().unwrap();
 		}
@@ -117,8 +115,8 @@ fn main() {
 			continue;
 		}
 		else {
-			println!("process completing");
 			let success_output = output.expect("Shell failed to execute command.").wait_with_output();
+			// Code below is for manually coloring terminal output - WIP
 			// if execute == "ls" {
 			// 	utility::test_ls_pretty_print(success_output);
 			// 	continue;

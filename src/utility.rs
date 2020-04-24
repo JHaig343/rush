@@ -27,6 +27,7 @@ pub fn handle_err(error: std::result::Result<(), std::io::Error>, command: &str)
 }
 
 // ANSI escape codes used to print output in color
+#[allow(dead_code)]
 pub fn pretty_print(output: Child) {
     let content = output.wait_with_output().unwrap();
     if !content.status.success() {
@@ -61,13 +62,18 @@ pub fn redirect_to_file(output: Output, filename: &str) {
 // Pipe shell program output as input to another shell program
 pub fn pipe_to_program(output: Output, program: &str, args: Vec<&str>) {
     let result = output.stdout;
-    // println!("in pipe_to_program: {:?}", result);
-    // println!("program to pipe to: {:?}", program);
-    let command = Command::new(program).args(args).stdin(Stdio::piped()).stdout(Stdio::piped()).spawn();
+    let mut command = Command::new(program).args(args).stdin(Stdio::piped()).stdout(Stdio::piped()).spawn().ok().expect("Failed to start command");
     // FIXME: do some proper error checking on the Result here
-    match command.ok().unwrap().stdin.unwrap().write_all(&result) {
+    // put stuff in new scope so borrow ends
+    let _ = {
+        let stdin_stream = command.stdin.as_mut().expect("Couldn't get pipestream");
+        stdin_stream.write_all(&result).ok().expect("Couldn't write to stream");
+        stdin_stream.flush().ok().expect("Couldn't flush stream");
+    };
+    
+    match command.wait_with_output() {
         Err(err) => panic!("couldn't write stdin to command: {:?}", err),
-        Ok(_) => println!("{}", String::from_utf8(result).ok().unwrap())
+        Ok(out) => print!("{}", String::from_utf8(out.stdout).ok().unwrap())
     }
 }
 
