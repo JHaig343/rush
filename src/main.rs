@@ -1,5 +1,5 @@
 // Rust SHell
-// v.0.3.0
+// v.0.4.0
 // By Jacob Haig (jhaig343@gmail.com)
 
 use std::path::Path;
@@ -133,8 +133,6 @@ fn main() {
 				continue;
 			}
 
-			// this literally does fuck-all....
-			// utility::pretty_print(success_output);
 			
 
 			
