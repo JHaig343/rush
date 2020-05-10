@@ -62,16 +62,22 @@ pub fn redirect_to_file(output: Output, filename: &str) {
 // Pipe shell program output as input to another shell program
 pub fn pipe_to_program(output: Output, program: &str, args: Vec<&str>) {
     let result = output.stdout;
-    let mut command = Command::new(program).args(args).stdin(Stdio::piped()).stdout(Stdio::piped()).spawn().ok().expect("Failed to start command");
-    // FIXME: do some proper error checking on the Result here
+    let command = Command::new(program).args(args).stdin(Stdio::piped()).stdout(Stdio::piped()).spawn();
+
+    if command.is_err() {
+        let failed_output = command.unwrap_err();
+        println!("\x1b[31m{}: {}\x1b[0m", program, failed_output);
+        return;
+    }
+    let mut command_result = command.ok().expect("Failed to start command");
     // put stuff in new scope so borrow ends
     let _ = {
-        let stdin_stream = command.stdin.as_mut().expect("Couldn't get pipestream");
+        let stdin_stream = command_result.stdin.as_mut().expect("Couldn't get pipestream");
         stdin_stream.write_all(&result).ok().expect("Couldn't write to stream");
         stdin_stream.flush().ok().expect("Couldn't flush stream");
     };
     
-    match command.wait_with_output() {
+    match command_result.wait_with_output() {
         Err(err) => panic!("couldn't write stdin to command: {:?}", err),
         Ok(out) => print!("{}", String::from_utf8(out.stdout).ok().unwrap())
     }

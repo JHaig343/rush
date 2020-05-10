@@ -97,10 +97,7 @@ fn main() {
 		}
 		// changing stdio to piped when piping commands so that Child's output can be saved
 		let output;
-		if redirect_flag == true {
-			output = Command::new(execute).args(args).stdout(Stdio::piped()).spawn();
-		}
-		else if piping_flag == true {
+		if redirect_flag == true || piping_flag == true {
 			output = Command::new(execute).args(args).stdout(Stdio::piped()).spawn();
 		}
 		else{
