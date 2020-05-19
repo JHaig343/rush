@@ -1,9 +1,10 @@
 // Rust SHell
 // v.0.4.0
 // By Jacob Haig (jhaig343@gmail.com)
-
+// TODO: replace rustyline with linefeed
 use std::path::Path;
 use std::env;
+use std::sync::Arc;
 use std::process::{Command, Stdio};
 mod utility;
 extern crate rustyline;
@@ -11,40 +12,39 @@ extern crate rustyline;
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
 
+use linefeed::{Interface, Prompter, ReadResult};
+use linefeed::complete::{Completer, Completion};
+
+
 fn main() {
 
 	let mut redirect_flag : bool = false;
 	let mut piping_flag : bool = false; 
 	let mut rl = Editor::<()>::new();
+	
+	let mut reader = Arc::new(Interface::new("rush").unwrap());
+
 	if rl.load_history("rush_history.txt").is_err() {
 		println!("No previous history found.");
 	}
+	let mut line;
 
 	loop {
+		line = String::new();
 		let print_dir = env::current_dir();
 		// NOTE: think this assert is superfluous
 		assert!(print_dir.is_ok());
 
 		let prompt = format!("\x1b[34m{}\x1b[0m=>$", print_dir.ok().unwrap().to_string_lossy());
+		reader.set_prompt(&prompt);
 
-		let line;
+		// let input = rl.readline(&prompt);
+		// FIXME: not covering 'EOF' result here
+		let ReadResult::Input(input) = reader.read_line().unwrap();
+		line = input;
+		println!("{}", line);
 
-		let input = rl.readline(&prompt);
-		match input {
-			Ok(command) => {
-				// Once a command is successfully executed, add it to readline history
-				// (which can be accessed by pressing Up Arrow)
-				rl.add_history_entry(command.as_str());
-				line = command;
-			},
-			Err(ReadlineError::Interrupted) => { //Ctrl-C interrupts
-				continue;
-			},
-			Err(err) => {
-				println!("Unexpected error parsing input: {:?}", err);
-				break;
-			}
-		}
+		
 
 		// separate string into words (split on spaces)
 		let split = line.split(" ");
