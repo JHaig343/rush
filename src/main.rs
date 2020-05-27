@@ -12,7 +12,7 @@ use rustyline::error::ReadlineError;
 use rustyline::Editor;
 
 fn main() {
-
+	
 	let mut redirect_flag : bool = false;
 	let mut piping_flag : bool = false; 
 	let mut rl = Editor::<()>::new();
@@ -60,7 +60,7 @@ fn main() {
 			// filename is the last argument in a "[command] > [file]" command.
 			redirect_file = args.pop().unwrap();
 		}
-		else if args.contains(&"|") { //piping - [command/input] | [command]
+		if args.contains(&"|") { //piping - [command/input] | [command]
 			piping_flag = true;
 			
 			let ind = args.iter().position(|&r| r == "|").unwrap();
@@ -112,27 +112,32 @@ fn main() {
 			continue;
 		}
 		else {
-			let success_output = output.expect("Shell failed to execute command.").wait_with_output();
+			let mut success_output = output.expect("Shell failed to execute command.").wait_with_output();
 			// Code below is for manually coloring terminal output - WIP
 			// if execute == "ls" {
 			// 	utility::test_ls_pretty_print(success_output);
 			// 	continue;
 			// }
 
+			let pipe_output;
+			// both redirect and piping can happen in the same command; so save the pipe output in
+			// case we need to redirect it to file
+			if piping_flag == true {
+				pipe_output = utility::pipe_to_program(success_output.unwrap(), redirect_prog, redirect_args);
+				success_output = Ok(pipe_output.expect("Bad Output from program piping"));
+				piping_flag = false;
+				if !redirect_flag {
+					print!("{}", String::from_utf8(success_output.ok().unwrap().stdout).ok().unwrap());
+					continue;
+				}
+			}
+			// do file redirect last 
 			if redirect_flag == true {
 				utility::redirect_to_file(success_output.unwrap(), redirect_file);
 				redirect_flag = false;
 				continue;
 			}
-			else if piping_flag == true {
-				utility::pipe_to_program(success_output.unwrap(), redirect_prog, redirect_args);
-				piping_flag = false;
-				continue;
-			}
 
-			
-
-			
 			
 		}
 	}

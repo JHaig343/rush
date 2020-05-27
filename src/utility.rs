@@ -60,14 +60,15 @@ pub fn redirect_to_file(output: Output, filename: &str) {
 }
 
 // Pipe shell program output as input to another shell program
-pub fn pipe_to_program(output: Output, program: &str, args: Vec<&str>) {
+// returns an Output object that either has its stdout printed or passed to file redirection
+pub fn pipe_to_program(output: Output, program: &str, args: Vec<&str>) -> Option<Output> {
     let result = output.stdout;
     let command = Command::new(program).args(args).stdin(Stdio::piped()).stdout(Stdio::piped()).spawn();
 
     if command.is_err() {
         let failed_output = command.unwrap_err();
         println!("\x1b[31m{}: {}\x1b[0m", program, failed_output);
-        return;
+        return None;
     }
     let mut command_result = command.ok().expect("Failed to start command");
     // put stuff in new scope so borrow ends
@@ -79,7 +80,7 @@ pub fn pipe_to_program(output: Output, program: &str, args: Vec<&str>) {
     
     match command_result.wait_with_output() {
         Err(err) => panic!("couldn't write stdin to command: {:?}", err),
-        Ok(out) => print!("{}", String::from_utf8(out.stdout).ok().unwrap())
+        Ok(out) => Some(out)
     }
 }
 
