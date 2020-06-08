@@ -24,8 +24,10 @@ fn main() {
 		let print_dir = env::current_dir();
 		// NOTE: think this assert is superfluous
 		assert!(print_dir.is_ok());
-
-		let prompt = format!("\x1b[34m{}\x1b[0m=>$", print_dir.ok().unwrap().to_string_lossy());
+		let user = env::var("USER");
+		let sys_name = env::var("NAME");
+		
+		let prompt = format!("\x1b[34m{}@{}:{}\x1b[0m=>$", user.ok().unwrap(), sys_name.ok().unwrap(), print_dir.ok().unwrap().to_string_lossy());
 
 		let line;
 
