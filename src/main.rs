@@ -112,11 +112,6 @@ fn main() {
 		}
 		else {
 			let mut success_output = output.expect("Shell failed to execute command.").wait_with_output();
-			// Code below is for manually coloring terminal output - WIP
-			// if execute == "ls" {
-			// 	utility::test_ls_pretty_print(success_output);
-			// 	continue;
-			// }
 
 			let pipe_output;
 			// both redirect and piping can happen in the same command; so save the pipe output in
@@ -125,6 +120,8 @@ fn main() {
 				pipe_output = utility::pipe_to_program(success_output.unwrap(), redirect_prog, redirect_args);
 				success_output = Ok(pipe_output.expect("Bad Output from program piping"));
 				piping_flag = false;
+				// if not redirecting, we can just print the output
+				// as we had piped the stdout earlier for this case
 				if !redirect_flag {
 					print!("{}", String::from_utf8(success_output.ok().unwrap().stdout).ok().unwrap());
 					continue;
