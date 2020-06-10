@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.0
+- Added the current user and system name to the shell prompt.
+- Fixed some issues with command piping using `|` and the interaction of `|` and `>` used in the same command.
+- Minor cleanup of some unused functions and redundant logic
+- Removed some unused dependencies.
+
 ## 0.4.0
 - added the ability to pipe the output of one command as the input of another command, via the `|` character. Output of the second command is then displayed to stdout. ex. `cat example.txt | head -2`
 

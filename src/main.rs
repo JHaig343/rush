@@ -1,5 +1,5 @@
 // Rust SHell
-// v.0.4.0
+// v.0.5.0
 // By Jacob Haig (jhaig343@gmail.com)
 
 use std::path::Path;
