@@ -2,6 +2,23 @@ use std::process::{Command, Stdio, Output};
 use std::fs::File;
 use std::io::{BufWriter, Write};
 
+use rustyline::completion::FilenameCompleter;
+use rustyline::error::ReadlineError;
+use rustyline::highlight::{Highlighter, MatchingBracketHighlighter};
+use rustyline::validate::MatchingBracketValidator;
+use rustyline::hint::HistoryHinter;
+use rustyline_derive::{Completer, Helper, Hinter, Highlighter, Validator};
+
+#[derive(Helper, Completer, Hinter, Validator, Highlighter)]
+pub struct TaskHelper {
+    #[rustyline(Completer)]
+    pub completer: FilenameCompleter,
+    pub highlighter: MatchingBracketHighlighter,
+    #[rustyline(Validator)]
+    pub validator: MatchingBracketValidator,
+    pub colored_prompt: String,
+}
+
 
 pub fn handle_err(error: std::result::Result<(), std::io::Error>, command: &str) {
     let failed_output = error.unwrap_err();
