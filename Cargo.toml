@@ -7,5 +7,6 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rustyline = "5.0.4"
+rustyline = "10.0.0"
+rustyline-derive = "0.7.0"
 # indicatif for progress bars

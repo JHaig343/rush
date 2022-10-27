@@ -8,14 +8,37 @@ use std::process::{Command, Stdio};
 mod utility;
 extern crate rustyline;
 
-use rustyline::error::ReadlineError;
-use rustyline::Editor;
+use std::borrow::Cow::{self, Borrowed, Owned};
 
-fn main() {
+use rustyline::completion::FilenameCompleter;
+use rustyline::error::ReadlineError;
+use rustyline::highlight::{Highlighter, MatchingBracketHighlighter};
+use rustyline::hint::HistoryHinter;
+use rustyline::validate::MatchingBracketValidator;
+use rustyline::{Cmd, CompletionType, Config, EditMode, Editor, KeyEvent};
+use rustyline_derive::{Completer, Helper, Hinter, Validator};
+
+
+
+
+fn main() -> rustyline::Result<()> {
 	
 	let mut redirect_flag : bool = false;
 	let mut piping_flag : bool = false; 
-	let mut rl = Editor::<()>::new();
+    // rustyline config - set parameters like completion performance, cmd history behaviour etc.
+    let config = Config::builder().history_ignore_dups(true).completion_type(CompletionType::List).edit_mode(EditMode::Emacs).build();
+    // add filename + folder completion, vbracket validator etc. - these can be customized to custom validators later if you need specifics
+    let h = utility::TaskHelper {
+        completer: FilenameCompleter::new(),
+        highlighter: MatchingBracketHighlighter::new(),
+        //FIXME: don't think I actually use this
+        colored_prompt: "".to_owned(),
+        validator: MatchingBracketValidator::new(),
+    };
+
+    let mut rl = Editor::with_config(config)?;
+    rl.set_helper(Some(h));
+
 	if rl.load_history("rush_history.txt").is_err() {
 		println!("No previous history found.");
 	}
@@ -137,5 +160,5 @@ fn main() {
 			
 		}
 	}
-	
+	rl.append_history("rush_history.txt")
 }
