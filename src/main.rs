@@ -8,15 +8,11 @@ use std::process::{Command, Stdio};
 mod utility;
 extern crate rustyline;
 
-use std::borrow::Cow::{self, Borrowed, Owned};
-
 use rustyline::completion::FilenameCompleter;
 use rustyline::error::ReadlineError;
-use rustyline::highlight::{Highlighter, MatchingBracketHighlighter};
-use rustyline::hint::HistoryHinter;
+use rustyline::highlight::{ MatchingBracketHighlighter};
 use rustyline::validate::MatchingBracketValidator;
-use rustyline::{Cmd, CompletionType, Config, EditMode, Editor, KeyEvent};
-use rustyline_derive::{Completer, Helper, Hinter, Validator};
+use rustyline::{ CompletionType, Config, EditMode, Editor};
 
 
 
@@ -31,7 +27,7 @@ fn main() -> rustyline::Result<()> {
     let h = utility::TaskHelper {
         completer: FilenameCompleter::new(),
         highlighter: MatchingBracketHighlighter::new(),
-        //FIXME: don't think I actually use this
+        //FIXME: don't think I actually use this??
         colored_prompt: "".to_owned(),
         validator: MatchingBracketValidator::new(),
     };

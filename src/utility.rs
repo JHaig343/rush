@@ -3,10 +3,8 @@ use std::fs::File;
 use std::io::{BufWriter, Write};
 
 use rustyline::completion::FilenameCompleter;
-use rustyline::error::ReadlineError;
-use rustyline::highlight::{Highlighter, MatchingBracketHighlighter};
+use rustyline::highlight::{ MatchingBracketHighlighter};
 use rustyline::validate::MatchingBracketValidator;
-use rustyline::hint::HistoryHinter;
 use rustyline_derive::{Completer, Helper, Hinter, Highlighter, Validator};
 
 #[derive(Helper, Completer, Hinter, Validator, Highlighter)]
