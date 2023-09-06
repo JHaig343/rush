@@ -1,5 +1,10 @@
 # Changelog
 
+# 0.6.0
+- Upgraded rustyline to v10.0, providing new ways of existing functionality(reverse history search) and
+easier implementation of new ones:
+- Added filename completion using rustyline - hitting 'tab' when typing a file or foldername will autocomplete the name, similar to Bash's behaviour
+
 ## 0.5.0
 - Added the current user and system name to the shell prompt.
 - Fixed some issues with command piping using `|` and the interaction of `|` and `>` used in the same command.
